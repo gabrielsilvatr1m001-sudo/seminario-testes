@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seminário - Spock Framework vs JMockit</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --text-bright: #f8fafc;
+      --text-subtle: #94a3b8;
+      --code-bg: #020617;
+      --spock-color: #38bdf8;
+      --jmockit-color: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: #020617; color: var(--text-bright); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* Header Navigation */
+    header { background: var(--bg-dark); border-bottom: 1px solid var(--card-border); padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; }
+    header .title { font-weight: 700; color: var(--accent); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+    header .controls { display: flex; gap: 12px; align-items: center; }
+    button { background: var(--card-bg); color: var(--text-bright); border: 1px solid var(--card-border); padding: 8px 18px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    button:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Container Principal */
+    main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .slide-card { background: var(--card-bg); border: 1px solid var(--card-border); border-left: 6px solid var(--accent); border-radius: 14px; width: 100%; max-width: 1020px; height: 600px; padding: 32px 38px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7); position: relative; }
+
+    /* Elementos Visuais */
+    .tag { color: var(--accent); font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    h1 { font-size: 1.95rem; color: var(--text-bright); margin-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    h2 { font-size: 1.15rem; color: #38bdf8; margin-top: 6px; margin-bottom: 4px; font-weight: 600; }
+    p, li { color: var(--text-subtle); font-size: 0.93rem; line-height: 1.45; }
+    ul { padding-left: 18px; }
+    li { margin-bottom: 4px; }
+    strong { color: #f1f5f9; }
+
+    /* Grid Layouts */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+    .feature-box { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); padding: 14px; border-radius: 10px; }
+
+    /* Bloco de Código */
+    pre { background: var(--code-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; font-family: 'Fira Code', 'Consolas', monospace; font-size: 0.82rem; overflow-x: auto; margin-top: 6px; }
+
+    /* Tabelas */
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid var(--card-border); padding: 7px 10px; text-align: left; font-size: 0.85rem; }
+    th { background: var(--code-bg); color: var(--accent); }
+    td { color: var(--text-subtle); }
+
+    /* Caixas de Fala */
+    .speech-notes { background: rgba(249, 115, 22, 0.1); border-left: 4px solid var(--accent); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 8px; font-size: 0.85rem; color: #fdba74; }
+    .speech-notes strong { color: var(--accent); }
+
+    /* Rodapé do Slide */
+    .slide-footer { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--card-border); padding-top: 10px; margin-top: auto; }
+    .author-info { color: var(--text-subtle); font-size: 0.82rem; }
+    .slide-number { color: var(--accent); font-weight: 700; font-size: 0.95rem; }
+
+    .slide { display: none; }
+    .slide.active { display: flex; }
+    
+    svg.icon { width: 20px; height: 20px; fill: currentColor; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Seminário: Testes de Software
+    </div>
+    <div class="controls">
+      <button onclick="changeSlide(-1)">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg> Anterior
+      </button>
+      <button onclick="changeSlide(1)">
+        Próximo <svg class="icon" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Slide 1: Capa -->
+    <div class="slide-card slide active">
+      <div>
+        <div class="tag">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+          PRÁTICA 01 · SEMINÁRIO DE SOFTWARE
+        </div>
+        <h1>Spock Framework × JMockit</h1>
+        <h2 style="color: var(--text-subtle); font-weight: 400; font-size: 1.15rem; margin-bottom: 14px;">
+          Estudo Aprofundado de Ferramentas para Testes Automatizados em Ecossistemas Java e Groovy
+        </h2>
+        <div class="grid-2">
+          <div class="feature-box">
+            <h2 style="color: var(--spock-color);">Spock Framework</h2>
+            <p>Framework de testes e especificações com linguagem orientada a comportamento (BDD), nativamente integrado ao JUnit Platform.</p>
+          </div>
+          <div class="feature-box">
+            <h2 style="color: var(--jmockit-color);">JMockit</h2>
+            <p>Toolkit especializado em isolamento por mocking avançado (byte-code manipulation) para testes unitários em Java puro.</p>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Boa tarde a todos! Apresentamos hoje nosso seminário de Testes de Software focando em duas soluções para a JVM: o Spock Framework e o JMockit. Analisaremos a arquitetura, sintaxe, prós e contras de cada ferramenta."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">
+          <strong>Apresentador:</strong> Gabriel Silva — RA: 325114630 | <strong>Data:</strong> 04/09/2026
+        </div>
+        <div class="slide-number">01 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Contextualização -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">01 · FUNDAMENTAÇÃO TEÓRICA</div>
+        <h1>A Importância da Estratégia de Testes</h1>
+        <div class="grid-2" style="margin-top: 10px;">
+          <div class="feature-box">
+            <h2>Por que Automatizar Testes?</h2>
+            <ul>
+              <li><strong>Detecção Precoce de Bugs:</strong> Reduz o custo financeiro de correções em fases avançadas.</li>
+              <li><strong>Prevenção de Regressões:</strong> Garante que novas funcionalidades não quebrem funcionalidades legadas.</li>
+              <li><strong>Documentação Viva:</strong> Os cenários de teste documentam o comportamento real da aplicação.</li>
+            </ul>
+          </div>
+          <div class="feature-box">
+            <h2>Conceitos Essenciais de Isolamento</h2>
+            <ul>
+              <li><strong>Unidade de Código:</strong> O menor bloco executável isolado (classe ou método).</li>
+              <li><strong>Test Doubles (Mocks/Stubs):</strong> Subtitutos controlados para dependências externas (bancos de dados, APIs, serviços).</li>
+              <li><strong>Verificação de Interação:</strong> Testar não apenas o retorno, mas quantas vezes e como as dependências foram chamadas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Para entender as ferramentas, precisamos relembrar a base dos testes unitários. O objetivo é isolar a regra de negócio. Para isso, utilizamos objetos dublês, conhecidos como Mocks, evitando que dependências como banco de dados interfiram no teste."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">02 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Arquitetura das Ferramentas -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">02 · VISÃO DE ARQUITETURA</div>
+        <h1>Diferenças Estruturais de Design</h1>
+        <div class="grid-2" style="margin-top: 10px;">
+          <div class="feature-box" style="border-top: 4px solid var(--spock-color);">
+            <h2 style="color: var(--spock-color);">Spock Framework</h2>
+            <p><strong>Ecossistema Completo:</strong> Funciona como Test Runner, motor de asserções e biblioteca de Mocks ao mesmo tempo.</p>
+            <p><strong>Meta-programação (Groovy):</strong> Permite sintaxe DSL elegante, eliminando código boilerplate e deixando os métodos com nomes em texto livre.</p>
+            <p><strong>JUnit Platform:</strong> A partir da versão 2.x, roda nativamente no ecossistema JUnit 5.</p>
+          </div>
+          <div class="feature-box" style="border-top: 4px solid var(--jmockit-color);">
+            <h2 style="color: var(--jmockit-color);">JMockit</h2>
+            <p><strong>Toolkit de Mocking Especializado:</strong> Não executa os testes sozinho; necessita de um runner como JUnit 4/5 ou TestNG.</p>
+            <p><strong>Manipulação de Bytecode:</strong> Utiliza a API `java.lang.instrument` para redefinir classes em tempo de execução via Java Agent.</p>
+            <p><strong>Isolamento Profundo:</strong> Capaz de simular métodos privados, estáticos, construtores e classes `final` sem alterar a arquitetura.</p>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "A grande diferença técnica está aqui: o Spock é um ecossistema completo baseado em Groovy que atua como Runner e Asserção. Já o JMockit é uma biblioteca que usa manipulação de bytecode para alterar o comportamento de classes Java em memória."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">03 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Deep Dive Spock -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">03 · SPOCK FRAMEWORK</div>
+        <h1>Sintaxe BDD e Estrutura Semântica</h1>
+        <p>Cada teste no Spock é chamado de <em>Feature Method</em> dentro de uma <em>Specification</em>:</p>
+        <div class="grid-2" style="margin-top: 8px;">
+          <div class="feature-box">
+            <h2>Blocos Principais</h2>
+            <ul>
+              <li><code>given: / setup:</code> Configuração inicial de fixtures e mocks.</li>
+              <li><code>when:</code> Execução do estímulo ou ação a ser testada.</li>
+              <li><code>then:</code> Validação de condições e verificação de interações.</li>
+              <li><code>expect:</code> Combina estímulo e validação em uma única expressão rápida.</li>
+            </ul>
+          </div>
+          <div class="feature-box">
+            <h2>Recursos Avançados</h2>
+            <ul>
+              <li><code>where:</code> Tabelas de dados para parametrizar testes (Data-Driven).</li>
+              <li><code>cleanup:</code> Executado sempre ao final para fechar recursos ou conexões.</li>
+              <li><strong>Mocks embutidos:</strong> Sintaxe nativa usando <code>Mock()</code>, <code>Stub()</code> e <code>Spy()</code> sem bibliotecas externas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "O Spock utiliza blocos explícitos para definir as etapas do teste. Em vez de comentários informais, o código possui labels estruturados como given, when e then, forçando uma excelente organização semântica."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">04 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Exemplo Prático Spock -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">04 · CÓDIGO SPOCK</div>
+        <h1>Exemplo Prático: BDD + Data-Driven Testing</h1>
+<pre>import spock.lang.Specification
+
+class DescontoServicoSpec extends Specification {
+
+    def "deve calcular desconto de acordo com o perfil do cliente"() {
+        given: "o serviço de cálculo de desconto"
+        def calculadora = new CalculadoraDesconto()
+
+        expect: "que o valor do desconto seja calculado corretamente"
+        calculadora.calcular(valorBase, perfil) == descontoEsperado
+
+        where: "tabela de cenários de teste parametrizados"
+        valorBase | perfil       || descontoEsperado
+        100.0     | 'VIP'        || 20.0
+        100.0     | 'REGULAR'    || 5.0
+        50.0      | 'NOVO'       || 0.0
+    }
+}</pre>
+        <p style="margin-top: 6px;">
+          <strong>Destaque Técnico:</strong> O bloco <code>where:</code> gera múltiplos testes independentes em tempo de compilação, permitindo testar bordas e variações de dados em uma única especificação limpa.
+        </p>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Neste exemplo em Spock, observamos a tabela de dados no bloco 'where'. Cada linha representa um caso de teste completo executado de forma independente pelo relatório da plataforma."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">05 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Deep Dive JMockit -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">05 · JMOCKIT TOOLKIT</div>
+        <h1>O Ciclo Record-Replay-Verify</h1>
+        <p>O JMockit impõe uma separação rígida de fases baseada no padrão formal de testes:</p>
+        <div class="grid-2" style="margin-top: 8px;">
+          <div class="feature-box">
+            <h2>Fases do Teste</h2>
+            <ul>
+              <li><strong>1. Record Phase:</strong> Dentro do bloco <code>new Expectations()</code>, grava-se quais métodos serão invocados, argumentos aceitos e os retornos/exceções forçados.</li>
+              <li><strong>2. Replay Phase:</strong> Chamada do método real sob teste. Mocks interceptam as chamadas gravadas.</li>
+              <li><strong>3. Verify Phase:</strong> Dentro de <code>new Verifications()</code>, confirma-se ordem, número de execuções ou limites de chamadas.</li>
+            </ul>
+          </div>
+          <div class="feature-box">
+            <h2>Anotações de Injeção</h2>
+            <ul>
+              <li><code>@Mocked:</code> Simula totalmente a classe ou interface fornecida.</li>
+              <li><code>@Injectable:</code> Simula apenas a instância específica injetada no teste.</li>
+              <li><code>@Tested:</code> Cria automaticamente a instância da classe sob teste, injetando os mocks declarados.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "No JMockit, temos três passos rigorosos. No Record, definimos as Expectations. No Replay, executamos o código real. No Verify, checamos se as chamadas de método ocorreram dentro do esperado."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">06 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Exemplo Prático JMockit -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">06 · CÓDIGO JMOCKIT</div>
+        <h1>Exemplo Prático: Mocking de Dependências</h1>
+<pre>@RunWith(JMockit.class)
+public class PedidoServicoTest {
+
+    @Tested private PedidoServico servico; // Classe sob teste
+    @Injectable private PagamentoGateway mockGateway; // Dependência mockada
+
+    @Test
+    public void deveProcessarPagamentoComSucesso() {
+        // 1. RECORD PHASE
+        new Expectations() {{
+            mockGateway.autorizar(anyBigDecimal); result = true;
+        }};
+
+        // 2. REPLAY PHASE
+        boolean sucesso = servico.finalizarCompra(new BigDecimal("150.00"));
+        assertTrue(sucesso);
+
+        // 3. VERIFY PHASE
+        new Verifications() {{
+            mockGateway.autorizar(withEqual(new BigDecimal("150.00"))); times = 1;
+        }};
+    }
+}</pre>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Observando o código Java puro com JMockit: usamos @Tested para a classe principal e @Injectable para a dependência. As expectativas e verificações utilizam blocos de inicialização anônimos."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">07 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Tabela Comparativa Aprofundada -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">07 · MATRIZ COMPARATIVA</div>
+        <h1>Comparativo Técnico Detalhado</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th style="color:var(--spock-color)">Spock Framework</th>
+              <th style="color:var(--jmockit-color)">JMockit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mecanismo Interno</strong></td>
+              <td>AST Transformations do Groovy em tempo de compilação</td>
+              <td>Redefinição de Bytecode via Java Instrumentation Agent</td>
+            </tr>
+            <tr>
+              <td><strong>Legibilidade e Expressividade</strong></td>
+              <td>Altíssima (Nomes de testes em strings, blocos BDD)</td>
+              <td>Média (Estrutura rígida de classes internas anônimas)</td>
+            </tr>
+            <tr>
+              <td><strong>Mock de Estáticos / Privados</strong></td>
+              <td>Limitado (Prioriza código bem desenhado / refatorado)</td>
+              <td>Total (Mocka construtores, estáticos e métodos privados)</td>
+            </tr>
+            <tr>
+              <td><strong>Testes Parametrizados</strong></td>
+              <td>Nativo e intuitivo via tabelas de dados (<code>where:</code>)</td>
+              <td>Depende dos recursos do JUnit (ex: <code>@ParameterizedTest</code>)</td>
+            </tr>
+            <tr>
+              <td><strong>Ecosistema e Ferramentas</strong></td>
+              <td>Integração nativa com Gradle, Maven, IntelliJ e Eclipse</td>
+              <td>Requer configuração de agente JVM (ex: `-javaagent`) nas versões recentes do Java</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Esta tabela consolida as diferenças: o Spock aposta em legibilidade e AST Transformations do Groovy, enquanto o JMockit aposta em manipulação direta de bytecode para mockar estruturas complexas em Java."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">08 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Análise Prática (Prós e Contras) -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">08 · ANÁLISE CRÍTICA</div>
+        <h1>Prós, Contras e Mitos das Ferramentas</h1>
+        <div class="grid-2">
+          <div class="feature-box">
+            <h2 style="color:var(--spock-color)">Spock Framework</h2>
+            <p><strong>Vantagens:</strong> Relatórios detalhados contendo os valores de cada variável em falhas de asserção. Excelente produtividade para cenários complexos.</p>
+            <p><strong>Desvantagens:</strong> Necessidade de compilar código Groovy no pipeline de build; resistência de times puristas em Java.</p>
+          </div>
+          <div class="feature-box">
+            <h2 style="color:var(--jmockit-color)">JMockit</h2>
+            <p><strong>Vantagens:</strong> Não exige linguagens adicionais no projeto. Capaz de testar sistemas legados sem necessidade de grande refatoração prévia.</p>
+            <p><strong>Desvantagens:</strong> A capacidade de mockar tudo pode incentivar maus ambientes de arquitetura (código fortemente acoplado).</p>
+          </div>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Analisando criticamente: o Spock nos dá relatórios fantásticos sobre o motivo exato da falha. O JMockit é uma ferramenta poderosa para sistemas legados, mas exige cuidado para não mascarar problemas de design do código."
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">Gabriel Silva — RA: 325114630</div>
+        <div class="slide-number">09 / 10</div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Conclusão -->
+    <div class="slide-card slide">
+      <div>
+        <div class="tag">09 · RECOMENDAÇÕES E CONCLUSÃO</div>
+        <h1>Diretrizes de Tomada de Decisão</h1>
+        <div class="feature-box" style="margin-bottom: 10px; border-left: 4px solid var(--spock-color);">
+          <p><strong>Adote o Spock Framework quando:</strong> O projeto busca uma cultura forte de testes BDD, especificações vivas lidas por analistas ou desenvolvedores, e existe abertura para utilizar Groovy na camada de testes da aplicação.</p>
+        </div>
+        <div class="feature-box" style="border-left: 4px solid var(--jmockit-color);">
+          <p><strong>Adote o JMockit quando:</strong> O projeto possui restrições estritas para o uso exclusivo da linguagem Java e requer simulação avançada de classes legadas sem alterar os fontes originais.</p>
+        </div>
+      </div>
+      <div class="speech-notes">
+        <strong>🎙️ O que falar:</strong> "Para concluir nosso trabalho: ambas as ferramentas entregam grande valor. A escolha dependerá da arquitetura do projeto e do perfil do time. Muito obrigado a todos pela atenção e ficamos abertos a dúvidas!"
+      </div>
+      <div class="slide-footer">
+        <div class="author-info">
+          <strong>Apresentador:</strong> Gabriel Silva — RA: 325114630
+        </div>
+        <div class="slide-number">10 / 10</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+
+    function changeSlide(direction) {
+      currentSlide = (currentSlide + direction + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    // Permite navegar pelos slides usando as setas do teclado e barra de espaço
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+  </script>
+</body>
+</html>
